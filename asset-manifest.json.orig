@@ -1,0 +1,27 @@
+{
+  "files": {
+    "main.css": "/hot-or-not/static/css/main.3bdb9875.css",
+<<<<<<< HEAD
+    "main.js": "/hot-or-not/static/js/main.987332a0.js",
+    "static/js/787.91e09ba0.chunk.js": "/hot-or-not/static/js/787.91e09ba0.chunk.js",
+    "index.html": "/hot-or-not/index.html",
+    "main.3bdb9875.css.map": "/hot-or-not/static/css/main.3bdb9875.css.map",
+    "main.987332a0.js.map": "/hot-or-not/static/js/main.987332a0.js.map",
+=======
+    "main.js": "/hot-or-not/static/js/main.c868842d.js",
+    "static/js/787.91e09ba0.chunk.js": "/hot-or-not/static/js/787.91e09ba0.chunk.js",
+    "index.html": "/hot-or-not/index.html",
+    "main.3bdb9875.css.map": "/hot-or-not/static/css/main.3bdb9875.css.map",
+    "main.c868842d.js.map": "/hot-or-not/static/js/main.c868842d.js.map",
+>>>>>>> 5721275 (Updates)
+    "787.91e09ba0.chunk.js.map": "/hot-or-not/static/js/787.91e09ba0.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.3bdb9875.css",
+<<<<<<< HEAD
+    "static/js/main.987332a0.js"
+=======
+    "static/js/main.c868842d.js"
+>>>>>>> 5721275 (Updates)
+  ]
+}

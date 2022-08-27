@@ -1,0 +1,34 @@
+- add pre-trained tensorflow model 
+- should have 320x320 box (DONE)
+     -allow user to move box to face 
+     - face detect and draw box around (overkill)
+     - add guiding circle inside box 
+- submit, image should go to model
+- draw facemesh after image capture 
+
+- have retake option (DONE)
+
+- alt, try to host just the json file (DONE)
+- fix normalization layer- can write a hardcoded normalization layer function.
+ -that way, when I get the feature vector, I know how to normalize it.
+
+
+
+Questions
+-how do call the helper function to 
+
+Idea
+- create class object where I initialize the bootup tensorflow landmark model. Then, I wish to access this (global variable)
+and call a method that takes in the image src and returns the landmarks array. 
+
+Camera image
+- when click on photo, take the photo. Then, retake and submit button show. 
+     if retake, the camera image should reset to beginning with take photo.
+     if submit, should get the landmarks array -> trained model. 
+
+Upload image 
+- toggle menu to choose between upload and camera image. Should have state variable in app, to see what is selected. 
+     -upload file. On submit, landmarks array -> trained model 
+
+Hotness bar 
+- how to animate the rating 
