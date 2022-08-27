@@ -36,7 +36,14 @@ function App() {
     img.width = "500";
     img.height = "500";
     //get the face box and convert to jpeg
-    console.log(img);
+    if (!landmarkDriverLoaded || !landmarkModelLoaded) {
+      console.error("submit button only ready once loaded");
+      return;
+    }
+    const landmarkArr = await landmarkDriver.getLandmarkArr(img);
+    console.log("landmarkArr", landmarkArr);
+    const predictionScore = await landmarkModel.predict(landmarkArr);
+    console.log("prediction score", predictionScore);
   });
 
   const WebcamCapture = () => {
@@ -73,7 +80,7 @@ function App() {
           {image != "" && (
             <div className="buttonsContainer">
               <button onClick={redo}>Redo</button>
-              {/* TODO: use material UI button, have the submit button be loading until the model is finished and prediction is finished */}
+              {/* TODO: use material UI button, have the submit button be loading until the model is finished. Then have it load again until prediction finished -> done modal */}
               <button onClick={submit}>Submit</button>
             </div>
           )}
