@@ -4,11 +4,12 @@ import Webcam from "react-webcam";
 import webStyles from "./webcam.module.css";
 import { LandmarkDriver } from "./landmark.js";
 import { LandmarkModel } from "./model.js";
+import * as tf from "@tensorflow/tfjs";
 
 var landmarkDriver;
 var landmarkModel;
 
-const model = await tf.loadLayersModel("./deep4_400.json");
+const model = tf.loadLayersModel("./deep4_400.json");
 
 function App() {
   const WebcamComponent = () => <Webcam />;

@@ -5,7 +5,7 @@ export class LandmarkModel {
     this.initFinished = false;
   }
   async initModel() {
-    this.model = await tf.loadLayersModel("./models/deep4_400.json");
+    this.model = await tf.loadLayersModel("./deep4_400.json");
     this.initFinished = true;
   }
 
