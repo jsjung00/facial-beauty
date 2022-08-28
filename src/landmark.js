@@ -2,6 +2,7 @@ import * as tf from "@tensorflow/tfjs";
 import * as faceLandmarksDetection from "@tensorflow-models/face-landmarks-detection";
 import "@tensorflow/tfjs-core";
 import "@tensorflow/tfjs-backend-webgl";
+import { IMAGE_HEIGHT, IMAGE_WIDTH } from "./params";
 //object that gets the landmark arr from an image element
 export class LandmarkDriver {
   constructor() {
@@ -34,7 +35,9 @@ export class LandmarkDriver {
     });
     let landmarkArr = [];
     faces[0].keypoints.forEach((keypoint) => {
-      landmarkArr.push(...[keypoint.x, keypoint.y, keypoint.z]);
+      landmarkArr.push(
+        ...[keypoint.x / IMAGE_WIDTH, keypoint.y / IMAGE_HEIGHT]
+      );
     });
     return landmarkArr;
   }

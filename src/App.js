@@ -4,6 +4,7 @@ import Webcam from "react-webcam";
 import webStyles from "./webcam.module.css";
 import { LandmarkDriver } from "./landmark.js";
 import { LandmarkModel } from "./model.js";
+import { arr_means, arr_stds } from "./params";
 
 var landmarkDriver;
 var landmarkModel;
@@ -48,8 +49,12 @@ function App() {
       return;
     }
     const landmarkArr = await landmarkDriver.getLandmarkArr(img);
-    console.log("landmarkArr", landmarkArr);
-    const predictionScore = await landmarkModel.predict(landmarkArr);
+    //normalize array
+    const mean_tensor = tf.tensor(arr_means);
+    const stds_tensor = tf.tensor(arr_stds);
+    let normArr = tf.tensor(landmarkArr).sub(mean_tensor).div(stds_tensor);
+    console.log("normArr", normArr);
+    const predictionScore = await landmarkModel.predict(normArr);
     console.log("prediction score", predictionScore);
   });
 
