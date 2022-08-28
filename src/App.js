@@ -5,6 +5,7 @@ import webStyles from "./webcam.module.css";
 import { LandmarkDriver } from "./landmark.js";
 import { LandmarkModel } from "./model.js";
 import { arr_means, arr_stds } from "./params";
+import * as tf from "@tensorflow/tfjs";
 
 var landmarkDriver;
 var landmarkModel;
