@@ -6,7 +6,7 @@ export class LandmarkModel {
   }
   async initModel() {
     this.model = await tf.loadLayersModel(
-      "https://jsjung00.github.io/model-json/deep4_400.json"
+      "https://jsjung00.github.io/model-json/deep4_400_noz_noeye.json"
     );
     this.initFinished = true;
   }
