@@ -25,9 +25,9 @@ function App() {
     landmarkDriver = new LandmarkDriver();
     const driverInitP = landmarkDriver.init();
     driverInitP.then(() => setLandmarkDriverLoaded(true));
-    landmarkModel = new LandmarkModel();
-    const modelInitP = landmarkModel.initModel();
-    modelInitP.then(() => setLandmarkModelLoaded(true));
+    //landmarkModel = new LandmarkModel();
+    //const modelInitP = landmarkModel.initModel();
+    //modelInitP.then(() => setLandmarkModelLoaded(true));
   }, []);
 
   const redo = React.useCallback(() => {
