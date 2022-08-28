@@ -7,6 +7,9 @@ import { LandmarkModel } from "./model.js";
 
 var landmarkDriver;
 var landmarkModel;
+
+const model = await tf.loadLayersModel("./deep4_400.json");
+
 function App() {
   const WebcamComponent = () => <Webcam />;
   const videoConstraints = {
