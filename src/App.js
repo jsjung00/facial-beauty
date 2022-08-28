@@ -51,11 +51,14 @@ function App() {
     }
     const landmarkArr = await landmarkDriver.getLandmarkArr(img);
     //normalize array
-    const mean_tensor = tf.tensor(arr_means);
-    const stds_tensor = tf.tensor(arr_stds);
-    let normArr = tf.tensor(landmarkArr).sub(mean_tensor).div(stds_tensor);
+    const mean_tensor = tf.tensor(arr_means, "float32");
+    const stds_tensor = tf.tensor(arr_stds, "float32");
+    let normArr = tf
+      .tensor(landmarkArr, "float32")
+      .sub(mean_tensor)
+      .div(stds_tensor);
     normArr = tf.expandDims(normArr, 0);
-    normArr = normArr.cast(normArr, "float32");
+    //normArr = normArr.cast(normArr, "float32");
     console.log("normArr", normArr);
     const predictionScore = await landmarkModel.predict(normArr);
     console.log("prediction score", predictionScore);
