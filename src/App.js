@@ -54,6 +54,7 @@ function App() {
     const mean_tensor = tf.tensor(arr_means);
     const stds_tensor = tf.tensor(arr_stds);
     let normArr = tf.tensor(landmarkArr).sub(mean_tensor).div(stds_tensor);
+    normArr = tf.expandDims(normArr, 0);
     console.log("normArr", normArr);
     const predictionScore = await landmarkModel.predict(normArr);
     console.log("prediction score", predictionScore);
