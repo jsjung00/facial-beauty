@@ -14,16 +14,22 @@ div {
   background-color: aliceblue;
   padding: 2rem;
 }
-.photoWrapper {
+.topWrapper {
   border: 1px solid black;
   height: 500px;
-  width: 500px;
+  width: 100%;
   position: relative;
 }
 .viewWrapper {
   height: 500px;
   width: 500px;
+  position: relative;
 }
+.buttonsContainer {
+  position: absolute;
+  bottom: 100px;
+}
+
 .faceBox {
   border: 2px dotted white;
   top: 50px;
@@ -32,4 +38,8 @@ div {
   position: absolute;
   left: calc(250px - 160px);
   z-index: 2;
+}
+.fileBox {
+  height: 500px;
+  width: 500px;
 }

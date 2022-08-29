@@ -27,6 +27,7 @@ export class LandmarkDriver {
   }
   async getLandmarkArr(imgElm) {
     if (!this.initFinished) {
+      console.error("getlandmarkarr called before init finished");
       return;
     }
     //TODO: confirm the flipHorizontal
