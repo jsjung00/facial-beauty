@@ -25,19 +25,24 @@ export class LandmarkDriver {
     this.detector = detector;
     this.initFinished = true;
   }
-  async getLandmarkArr(imgElm) {
+  async getLandmarkArr(imgElm, flipImage) {
     if (!this.initFinished) {
       console.error("getlandmarkarr called before init finished");
       return;
     }
     //TODO: confirm the flipHorizontal
     const faces = await this.detector.estimateFaces(imgElm, {
-      flipHorizontal: true,
+      flipHorizontal: flipImage,
     });
     let landmarkArr = [];
+    const firstLandmark = faces[0].keypoints[0];
+    const diameter = faces[0].keypoints[454].x - faces[0].keypoints[234].x;
     faces[0].keypoints.forEach((keypoint) => {
       landmarkArr.push(
-        ...[keypoint.x / IMAGE_WIDTH, keypoint.y / IMAGE_HEIGHT]
+        ...[
+          (keypoint.x - firstLandmark.x) / diameter,
+          (keypoint.y - firstLandmark.y) / diameter,
+        ]
       );
     });
     return landmarkArr;

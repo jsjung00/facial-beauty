@@ -12,13 +12,26 @@ div {
   height: 100vh;
   width: 100vw;
   background-color: aliceblue;
+}
+.bodyWrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  flex-grow: 1;
+  background-color: aquamarine;
   padding: 2rem;
 }
 .topWrapper {
   border: 1px solid black;
-  height: 500px;
+  height: 600px;
   width: 100%;
   position: relative;
+  margin-top: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
 }
 .viewWrapper {
   height: 500px;
@@ -42,4 +55,9 @@ div {
 .fileBox {
   height: 500px;
   width: 500px;
+}
+
+.fileUploader {
+  height: "100%";
+  width: "100%";
 }

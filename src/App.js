@@ -13,11 +13,22 @@ import ReactCrop, {
   PixelCrop,
 } from "react-image-crop";
 import "react-image-crop/dist/ReactCrop.css";
+import DenseAppBar from "./AppBar";
+import Typography from "@mui/material/Typography";
+import Box from "@mui/material/Box";
+import CircularProgress from "@mui/material/CircularProgress";
+import IconButton from "@mui/material/IconButton";
+import PhotoCamera from "@mui/icons-material/PhotoCamera";
+import Slider from "@mui/material/Slider";
+import CropIcon from "@mui/icons-material/Crop";
+import RedoIcon from "@mui/icons-material/Redo";
+import Button from "@mui/material/Button";
 
 import * as tf from "@tensorflow/tfjs";
 
 var landmarkDriver;
 var landmarkModel;
+var outputNormArr;
 
 function App() {
   const videoConstraints = {
@@ -30,7 +41,10 @@ function App() {
   const [finalImage, setFinalImage] = useState("");
   const [landmarkDriverLoaded, setLandmarkDriverLoaded] = useState(false);
   const [landmarkModelLoaded, setLandmarkModelLoaded] = useState(false);
-  const [showFileUpload, setShowFileUpload] = useState(true);
+  var driverModelLoaded = landmarkDriverLoaded && landmarkModelLoaded;
+  const [showFileUpload, setShowFileUpload] = useState(false);
+  const [cropDone, setCropDone] = useState(false);
+  const aspect = 1;
 
   //initialize the landmarkDriver and model
   useEffect(() => {
@@ -62,16 +76,26 @@ function App() {
       console.error("submit button only ready once loaded");
       return;
     }
-    const landmarkArr = await landmarkDriver.getLandmarkArr(img);
+    //flip image if camera, else don't
+    const landmarkArr = await landmarkDriver.getLandmarkArr(
+      img,
+      !showFileUpload
+    );
     console.log(landmarkArr);
+    return landmarkArr;
 
     //normalize array
     const mean_tensor = tf.tensor(arr_means);
     const stds_tensor = tf.tensor(arr_stds);
     let normArr = tf.tensor(landmarkArr).sub(mean_tensor).div(stds_tensor);
     normArr = tf.expandDims(normArr, 0);
+    if (!Boolean(outputNormArr)) {
+      outputNormArr = normArr.dataSync();
+    } else {
+      console.log("is the same:", outputNormArr === normArr.dataSync());
+    }
     //normArr = normArr.cast(normArr, "float32");
-    console.log("normArr", normArr);
+    console.log("normArr", normArr.dataSync());
     const predictionScore = await landmarkModel.predict(normArr).dataSync();
     console.log("prediction score", predictionScore);
     return predictionScore;
@@ -81,10 +105,7 @@ function App() {
     const webcamRef = React.useRef(null);
     const capture = React.useCallback(() => {
       const imageSrc = webcamRef.current.getScreenshot();
-      console.log("imageSrc", imageSrc);
       setRawImage(imageSrc);
-      setFinalImage(imageSrc);
-      //TODO: convert raw image into cropped version
     }, [webcamRef]);
     return (
       <>
@@ -96,10 +117,17 @@ function App() {
             screenshotFormat="image/jpeg"
             width={500}
             videoConstraints={videoConstraints}
+            mirrored={true}
           />
-          <button onClick={capture} className={webStyles.snapButton}>
-            Capture
-          </button>
+          <IconButton
+            component="label"
+            className={webStyles.snapButton}
+            onClick={capture}
+            size="large"
+            sx={{ width: 70, height: 70, bottom: 10, position: "absolute" }}
+          >
+            <PhotoCamera fontSize="large" color="primary" />
+          </IconButton>
         </div>
       </>
     );
@@ -114,11 +142,19 @@ function App() {
       setRawImage(imageUrl);
     };
     return (
-      <FileUploader handleChange={handleChange} name="file" types={fileTypes} />
+      <FileUploader
+        handleChange={handleChange}
+        name="file"
+        types={fileTypes}
+        className="fileUploader"
+      />
     );
   };
   //contains the image, the cropping of image, and the cropped image on the right
   const CropFile = () => {
+    const [completedCrop, setCompletedCrop] = useState(null);
+    const [crop, setCrop] = useState(null);
+    const [scale, setScale] = useState(1);
     const centerAspectCrop = (mediaWidth, mediaHeight, aspect) => {
       return centerCrop(
         makeAspectCrop(
@@ -134,11 +170,6 @@ function App() {
         mediaHeight
       );
     };
-    const [crop, setCrop] = useState(null);
-    const [completedCrop, setCompletedCrop] = useState(null);
-    const [cropDone, setCropDone] = useState(false);
-    const [scale, setScale] = useState(1);
-    const aspect = 1;
 
     function onImageLoad(e) {
       if (aspect) {
@@ -149,94 +180,121 @@ function App() {
 
     function getResizeImage(image, crop) {
       const canvas = document.createElement("canvas");
-      const imageElm = document.createElement("img");
-      imageElm.src = rawImage;
-      imageElm.width = 500;
-      imageElm.height = 500;
-      console.log(imageElm);
+      canvas.width = 320;
+      canvas.height = 320;
       const ctx = canvas.getContext("2d");
-      //canvas.width = 320;
-      //canvas.height = 320;
-      canvas.width = 1000;
-      canvas.height = 1000;
-      /*
-      ctx.drawImage(
-        image,
-        crop.x,
-        crop.y,
-        crop.width,
-        crop.height,
-        0,
-        0,
-        320,
-        320
-      );*/
-      ctx.drawImage(imageElm, 0, 0);
-      const finalImgSrc = canvas.toDataURL("image/png");
-      return finalImgSrc;
+      var imageElm = new Image();
+      imageElm.onload = () => {
+        ctx.drawImage(
+          image,
+          crop.x,
+          crop.y,
+          crop.width,
+          crop.height,
+          0,
+          0,
+          320,
+          320
+        );
+        const finalImgSrc = canvas.toDataURL("image/png");
+        setFinalImage(finalImgSrc);
+        setCropDone(true);
+      };
+      imageElm.src = rawImage;
     }
 
     async function onCropDone() {
-      console.log("crop", completedCrop);
       if (completedCrop && completedCrop.width && completedCrop.height) {
         var imgElement = document.createElement("img");
         imgElement.src = rawImage;
-        const imgPath = getResizeImage(imgElement, completedCrop);
-        console.log("final image", imgPath);
-        setFinalImage(imgPath);
-        setCropDone(true);
+        getResizeImage(imgElement, completedCrop);
       }
     }
-
     return (
-      <>
-        {!cropDone && (
-          <>
-            <div className="cropControls">
-              <input
-                id="scale-input"
-                type="number"
-                step="0.1"
-                value={scale}
-                onChange={(e) => setScale(Number(e.target.value))}
-              />
-              <button
-                onClick={() => {
-                  onCropDone();
-                }}
-              >
-                Crop
-              </button>
-            </div>
-            <ReactCrop
-              crop={crop}
-              onChange={(pixelCrop, percentCrop) => setCrop(pixelCrop)}
-              onComplete={(pixelCrop, percentCrop) =>
-                setCompletedCrop(pixelCrop)
-              }
-              aspect={aspect}
-            >
-              <img
-                alt="Crop me"
-                src={rawImage}
-                style={{ transform: `scale(${scale})` }}
-                onLoad={onImageLoad}
-              />
-            </ReactCrop>
-          </>
-        )}
-        {cropDone && (
-          <>
-            <p>Helo</p>
-            <img src={finalImage}></img>
-          </>
-        )}
-      </>
+      <Box
+        sx={{
+          width: 600,
+          height: "100%",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <ReactCrop
+          crop={crop}
+          onChange={(pixelCrop, percentCrop) => setCrop(pixelCrop)}
+          onComplete={(pixelCrop, percentCrop) => setCompletedCrop(pixelCrop)}
+          aspect={aspect}
+        >
+          <img
+            alt="Crop me"
+            src={rawImage}
+            style={{ transform: `scale(${scale})` }}
+            onLoad={onImageLoad}
+          />
+        </ReactCrop>
+        <Box
+          sx={{ display: "flex", justifyContent: "center", padding: "1rem" }}
+        >
+          <Typography variant="h6" align="center" sx={{ marginRight: "2rem" }}>
+            Zoom Ratio
+          </Typography>
+          <Box sx={{ width: 100 }}>
+            <Slider
+              aria-label="Always visible"
+              defaultValue={1}
+              step={0.1}
+              valueLabelDisplay="on"
+              min={1}
+              max={2}
+              value={scale}
+              onChange={(e) => setScale(Number(e.target.value))}
+            />
+          </Box>
+          <Button
+            variant="contained"
+            endIcon={<CropIcon />}
+            sx={{ marginLeft: "3rem" }}
+            onClick={onCropDone}
+          >
+            Crop
+          </Button>
+        </Box>
+      </Box>
     );
   };
   const FileComponent = () => {
-    return <div>{Boolean(rawImage) ? <CropFile /> : <FileBox />}</div>;
+    return (
+      <Box
+        sx={{
+          width: "100%",
+          height: "100%",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <FileBox />
+      </Box>
+    );
   };
+  const WebCamComponent = () => {
+    return (
+      <Box
+        sx={{
+          width: "100%",
+          height: "100%",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <WebcamCapture />
+      </Box>
+    );
+  };
+
   const [fileSrc, setFileSrc] = useState(null);
   const DumbFileComponent = () => {
     function handleChange(e) {
@@ -259,27 +317,52 @@ function App() {
 
   return (
     <div className="allWrapper">
-      <div className="topWrapper">
-        {!showFileUpload && (
+      <DenseAppBar />
+      <div className="bodyWrapper">
+        <Typography variant="h1" align="center">
+          Hot or Not
+        </Typography>
+        {driverModelLoaded ? (
           <>
-            <div className="viewWrapper">
-              <div className="faceBox"></div>
-              {rawImage == "" ? <WebcamCapture /> : <img src={rawImage} />}
+            <div className="topWrapper">
+              {!Boolean(rawImage) && !showFileUpload && <WebCamComponent />}
+              {!Boolean(rawImage) && showFileUpload && <FileComponent />}
+              {Boolean(rawImage) && !Boolean(finalImage) && <CropFile />}
             </div>
+            {Boolean(rawImage) && (
+              <Box>
+                <Button variant="outlined" startIcon={<RedoIcon />}>
+                  Redo
+                </Button>
+                <Button
+                  variant="contained"
+                  endIcon={<CropIcon />}
+                  sx={{ marginLeft: "3rem" }}
+                >
+                  Send
+                </Button>
+              </Box>
+            )}
+            <div className="ratingWrapper">Rating bar goes here</div>
           </>
+        ) : (
+          <div className="topWrapper">
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                width: 500,
+                height: 500,
+                borderRadius: "2rem",
+                boxShadow: "rgba(0, 0, 0, 0.1) 0px 4px 12px",
+              }}
+            >
+              <CircularProgress size={100} />
+            </Box>
+          </div>
         )}
-        {showFileUpload && <DumbFileComponent />}
       </div>
-
-      {Boolean(rawImage) && (
-        <div className="buttonsContainer">
-          <button onClick={redo}>Redo</button>
-          {/* TODO: use material UI button, have the submit button be loading until the model is finished. Then have it load again until prediction finished -> done modal */}
-          <button onClick={submit}>Submit</button>
-        </div>
-      )}
-
-      <div className="ratingWrapper">Rating bar goes here</div>
     </div>
   );
 }
